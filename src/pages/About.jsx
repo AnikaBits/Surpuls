@@ -1,674 +1,525 @@
+// src/pages/About.jsx
+// মার্জ করা ভার্সন: দুই About পেজের দরকারি অংশ একসাথে। FAQ আর Live Impact বাদ।
+// থিম: হলুদ + গাঢ় সবুজ (Home-এর মতো), ইমোজির বদলে আইকন।
+//
+// সেকশনের ক্রম:
+//   হিরো → আমাদের গল্প → মিশন ও ভিশন → মূল্যবোধ → আমরা কী করি →
+//   NGO পার্টনার (আসল ডেটা) → Events → টিম → কমিউনিটি → শেষ CTA
+//
+// দরকার: components/LiveStats.jsx (শুধু Icon-এর জন্য), components/Navbar, components/Footer,
+//        assets/img3.jpeg, assets/img4.jpeg
+
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
+import { Icon } from "../components/LiveStats";
+import { useAuth } from "../context/AuthContext";
 import img3 from "../assets/img3.jpeg";
 import img4 from "../assets/img4.jpeg";
+import anika from "../assets/anika.jpg";
+import sufia from "../assets/sufia.jpg";
+import tishma from "../assets/tishma.jpg";
+
+// ========== এখানে নিজের তথ্য বসাও ==========
+
+// Events: সত্যিকারের ইভেন্ট অনুযায়ী নাম, তারিখ ও ছবি বদলাও (কার্ড যোগ/কমানো যাবে)
+const EVENTS = [
+  { img: img3, title: "Food Campaign at Shristi Orphanage", date: "" },
+  { img: img4, title: "Food Campaign at Shristi Orphanage", date: "" },
+];
+
+// টিম: নাম, ভূমিকা, ছবি (ছবি ফাঁকা ("") থাকলে হালকা রঙের বক্স দেখাবে)
+const TEAM = [
+  { name: "Sadia Farjana Anika", role: "Founder & Project Lead", img: anika },
+  { name: "Sufia Akter", role: "Operations Lead", img: sufia },
+  { name: "Miftahul jannat Tishma", role: "Outreach & Volunteer Coordinator", img:tishma},
+  
+];
+
+// =========================================
+
+const FONT = { fontFamily: "'Bricolage Grotesque', system-ui, sans-serif" };
+
+// হলুদ হাইলাইট
+function Highlight({ children }) {
+  return (
+    <span className="relative inline-block">
+      <span className="relative z-10">{children}</span>
+      <span className="absolute -inset-x-2 -inset-y-1 bg-[#F2B01E]/70 -rotate-1 rounded-full z-0" aria-hidden="true" />
+    </span>
+  );
+}
+
+function Photo({ src, alt = "", className = "" }) {
+  if (src) return <img src={src} alt={alt} className={`object-cover ${className}`} />;
+  return <div className={`bg-[#ECE4C8] ${className}`} aria-hidden="true" />;
+}
+
+function Eyebrow({ children, dark = false }) {
+  return (
+    <span
+      className={`inline-block rounded-full px-4 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase ${
+        dark ? "bg-white/10 border border-white/15 text-[#F6D98A]" : "bg-[#FFE9A8] text-[#8A5A00]"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+const MISSION_VISION = [
+  {
+    icon: "star",
+    title: "Our Mission",
+    text: "To reduce food waste by connecting individuals, restaurants and businesses with NGOs that can help make use of surplus food. We aim to encourage responsible sharing and community participation.",
+    ring: "bg-[#FFE9A8] text-[#8A5A00]",
+    bar: "bg-[#F2B01E]",
+  },
+  {
+    icon: "search",
+    title: "Our Vision",
+    text: "A future where usable food is valued, communities are connected and fewer resources are wasted. We envision a society where sharing surplus food becomes a common and meaningful practice.",
+    ring: "bg-[#DDF2E2] text-[#2F7A55]",
+    bar: "bg-[#8FD19E]",
+  },
+];
+
+const VALUES = [
+  {
+    icon: "bowl",
+    title: "Reduce Food Waste",
+    text: "We connect people who have surplus food with those who can use it.",
+  },
+  {
+    icon: "handshake",
+    title: "Connect Communities",
+    text: "Donors, NGOs and volunteers come together to support people in need.",
+  },
+  {
+    icon: "users",
+    title: "Spread Kindness",
+    text: "We believe every small act of kindness can create a meaningful difference.",
+  },
+  {
+    icon: "chart",
+    title: "Build a Better Future",
+    text: "By sharing resources responsibly, we work toward a more sustainable community.",
+  },
+];
+
+const SERVICES = [
+  {
+    icon: "bowl",
+    title: "Surplus Food Sharing",
+    text: "Donors list what they have, how much, where to collect it and when it expires.",
+  },
+  {
+    icon: "bolt",
+    title: "Urgent Food First",
+    text: "Food with the least time left rises to the top, so NGOs collect it before it spoils.",
+  },
+  {
+    icon: "handshake",
+    title: "NGO Connection",
+    text: "NGOs connect with food donors and explore the donations available near them.",
+  },
+  {
+    icon: "truck",
+    title: "Tracked Pickups",
+    text: "Each donation moves from approved to picked up, on the way and delivered.",
+  },
+  {
+    icon: "shield",
+    title: "Trusted Accounts",
+    text: "An admin reviews every donor and NGO before they can post or collect food.",
+  },
+  {
+    icon: "users",
+    title: "Food Waste Awareness",
+    text: "We promote responsible food sharing and awareness about reducing food waste.",
+  },
+];
+
+const COMMUNITY_POINTS = [
+  "Connect with food-sharing communities",
+  "Support responsible food donations",
+  "Help reduce food waste",
+];
 
 function About() {
-  const values = [
-    {
-      icon: "🍱",
-      title: "Reduce Food Waste",
-      description:
-        "We aim to reduce food waste by connecting people who have surplus food with those who can use it.",
-      color: "bg-green-100",
-    },
-    {
-      icon: "🤝",
-      title: "Connect Communities",
-      description:
-        "Our platform brings donors, NGOs and volunteers together to support people in need.",
-      color: "bg-emerald-100",
-    },
-    {
-      icon: "💚",
-      title: "Spread Kindness",
-      description:
-        "We believe every small act of kindness can create a meaningful difference.",
-      color: "bg-rose-100",
-    },
-    {
-      icon: "🌍",
-      title: "Build a Better Future",
-      description:
-        "By sharing resources responsibly, we can work toward a more sustainable community.",
-      color: "bg-orange-100",
-    },
-  ];
+  const { users = [] } = useAuth();
 
-  const services = [
-    {
-      icon: "🥗",
-      title: "Surplus Food Sharing",
-      description:
-        "Donors can share information about available surplus food through the platform.",
-    },
-    {
-      icon: "🏢",
-      title: "NGO Connection",
-      description:
-        "NGOs can connect with food donors and explore available food donations.",
-    },
-    {
-      icon: "🤝",
-      title: "Community Support",
-      description:
-        "FoodShare encourages collaboration between individuals, restaurants, businesses and NGOs.",
-    },
-    {
-      icon: "🌱",
-      title: "Food Waste Awareness",
-      description:
-        "We promote responsible food sharing and awareness about reducing food waste.",
-    },
-    {
-      icon: "🍱",
-      title: "Donation Opportunities",
-      description:
-        "Individuals and organizations can register as donors and participate in food sharing.",
-    },
-    {
-      icon: "💚",
-      title: "Meaningful Impact",
-      description:
-        "Our goal is to help communities make better use of available food resources.",
-    },
-  ];
+  // আসল ডেটা: অনুমোদিত NGO তালিকা (না থাকলে সেকশন লুকানো)
+  const approvedNgos = users.filter((u) => u.role === "ngo" && u.status === "approved");
+
+  const focus =
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0F2E22]";
 
   return (
-    <div className="min-h-screen bg-[#f8faf6] text-gray-800 overflow-hidden">
+    <div className="min-h-screen bg-[#F6F7F2] text-[#14231B] overflow-x-hidden" style={FONT}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap');`}</style>
 
       <Navbar />
 
-      {/* ================= HERO SECTION ================= */}
-
-      <section className="relative overflow-hidden bg-gradient-to-br from-green-900 via-green-800 to-emerald-600 py-20 lg:py-28">
-
-        {/* Background Decoration */}
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="absolute -bottom-24 -right-20 w-96 h-96 bg-emerald-300/20 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-
-          <div className="grid lg:grid-cols-2 gap-14 items-center">
-
-            {/* Left Content */}
-            <div>
-
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-5 py-2 bg-white/10 border border-white/20 rounded-full">
-
-                <span className="text-green-100 text-sm font-semibold">
-                  🌱 About FoodShare
-                </span>
-
-              </div>
-
-              {/* Heading */}
-              <h1 className="mt-7 text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
-
-                Sharing Food.
-
-                <span className="block mt-2 text-green-200">
-                  Spreading Hope.
-                </span>
-
-              </h1>
-
-              {/* Description */}
-              <p className="mt-7 text-lg text-green-50/90 leading-8 max-w-xl">
-
-                FoodShare is a community-focused platform
-                designed to connect surplus food donors
-                with NGOs and organizations that can help
-                distribute food to people in need.
-
-                Together, we aim to reduce food waste
-                and create a more caring community.
-
-              </p>
-
-              {/* Buttons */}
-              <div className="mt-9 flex flex-wrap gap-4">
-
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-3 px-8 py-4 bg-white text-green-800 font-bold rounded-xl shadow-lg hover:bg-green-50 hover:-translate-y-1 transition-all duration-300"
-                >
-                  Join Our Mission →
-                </Link>
-
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center px-8 py-4 border-2 border-white/70 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300"
-                >
-                  Contact Us
-                </Link>
-
-              </div>
-
-            </div>
-
-            {/* Right Image */}
-            <div className="relative">
-
-              <div className="absolute -inset-4 bg-white/15 rounded-[3rem] blur-2xl"></div>
-
-              <img
-                src={img3}
-                alt="FoodShare community initiative"
-                loading="lazy"
-                className="relative w-full h-[350px] sm:h-[450px] object-cover rounded-[2.5rem] border-4 border-white/30 shadow-2xl"
-              />
-
-              {/* Floating Card */}
-              <div className="absolute bottom-5 left-3 right-3 sm:left-6 sm:right-6 bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-xl">
-
-                <div className="flex items-center gap-4">
-
-                  <div className="w-14 h-14 shrink-0 bg-green-100 rounded-2xl flex items-center justify-center text-3xl">
-                    💚
-                  </div>
-
-                  <div>
-
-                    <p className="text-sm text-gray-500">
-                      Our Purpose
-                    </p>
-
-                    <h3 className="text-lg font-bold text-green-900">
-                      Good Food. Better Purpose.
-                    </h3>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= OUR STORY ================= */}
-
-      <section className="py-20 lg:py-28 bg-white">
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-            {/* Image */}
-            <div className="relative">
-
-              <div className="absolute -inset-4 bg-green-200/40 rounded-[3rem] blur-2xl"></div>
-
-              <img
-                src={img4}
-                alt="Community food sharing"
-                loading="lazy"
-                className="relative w-full h-[350px] sm:h-[480px] object-cover rounded-[2.5rem] shadow-xl"
-              />
-
-              <div className="absolute bottom-5 left-5 bg-white/95 backdrop-blur-md px-6 py-4 rounded-2xl shadow-lg">
-
-                <p className="text-green-700 font-bold text-lg">
-                  🌱 Every Meal Matters
-                </p>
-
-              </div>
-
-            </div>
-
-            {/* Content */}
-            <div>
-
-              <span className="inline-block px-5 py-2 bg-green-100 text-green-700 text-sm font-bold rounded-full">
-                Our Story
-              </span>
-
-              <h2 className="mt-6 text-4xl sm:text-5xl font-extrabold text-green-950 leading-tight">
-
-                Why We Created
-
-                <span className="block bg-gradient-to-r from-green-600 to-emerald-400 bg-clip-text text-transparent">
-                  FoodShare
-                </span>
-
-              </h2>
-
-              <p className="mt-6 text-gray-600 text-lg leading-8">
-
-                Every day, usable food may go to waste
-                while many people struggle to access
-                sufficient meals.
-
-                FoodShare was designed around a simple
-                idea: connect people who have extra food
-                with organizations that can put it to good use.
-
-              </p>
-
-              <p className="mt-5 text-gray-600 leading-8">
-
-                Our platform aims to make food sharing
-                easier by bringing donors and NGOs
-                together in one place.
-
-                We believe technology can support
-                meaningful community action.
-
-              </p>
-
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-3 mt-8 px-8 py-4 bg-gradient-to-r from-green-700 to-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                Become a Member →
-              </Link>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= MISSION & VISION ================= */}
-
-      <section className="py-20 lg:py-24 bg-gradient-to-br from-green-50 to-emerald-50">
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-          {/* Heading */}
-          <div className="text-center max-w-3xl mx-auto">
-
-            <span className="inline-block px-5 py-2 bg-white border border-green-200 rounded-full text-green-700 text-sm font-bold">
-              💚 What Drives Us
-            </span>
-
-            <h2 className="mt-6 text-4xl sm:text-5xl font-extrabold text-green-950">
-              Our Mission & Vision
-            </h2>
-
-            <p className="mt-5 text-gray-600 text-lg leading-8">
-
-              Building stronger communities through
-              responsible food sharing and meaningful connections.
-
-            </p>
-
-          </div>
-
-          {/* Cards */}
-          <div className="grid md:grid-cols-2 gap-8 mt-14">
-
-            {/* Mission */}
-            <div className="group bg-white p-8 sm:p-10 rounded-3xl border border-green-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-
-              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-4xl">
-                🎯
-              </div>
-
-              <h3 className="mt-7 text-3xl font-extrabold text-green-900">
-                Our Mission
-              </h3>
-
-              <p className="mt-5 text-gray-600 leading-8">
-
-                To reduce food waste by connecting
-                individuals, restaurants and businesses
-                with NGOs that can help make use of
-                surplus food.
-
-                We aim to encourage responsible sharing
-                and community participation.
-
-              </p>
-
-              <div className="mt-7 w-16 h-1 bg-green-500 rounded-full group-hover:w-28 transition-all duration-300"></div>
-
-            </div>
-
-            {/* Vision */}
-            <div className="group bg-white p-8 sm:p-10 rounded-3xl border border-emerald-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-
-              <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-4xl">
-                🌍
-              </div>
-
-              <h3 className="mt-7 text-3xl font-extrabold text-green-900">
-                Our Vision
-              </h3>
-
-              <p className="mt-5 text-gray-600 leading-8">
-
-                A future where usable food is valued,
-                communities are connected and fewer
-                resources are wasted.
-
-                We envision a society where sharing
-                surplus food becomes a common
-                and meaningful practice.
-
-              </p>
-
-              <div className="mt-7 w-16 h-1 bg-emerald-500 rounded-full group-hover:w-28 transition-all duration-300"></div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= OUR VALUES ================= */}
-
-      <section className="py-20 lg:py-28 bg-white">
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-          {/* Heading */}
-          <div className="text-center max-w-3xl mx-auto">
-
-            <span className="inline-block px-5 py-2 bg-green-100 text-green-700 text-sm font-bold rounded-full">
-              🌱 Our Core Values
-            </span>
-
-            <h2 className="mt-6 text-4xl sm:text-5xl font-extrabold text-green-950">
-              What We Believe In
-            </h2>
-
-            <p className="mt-5 text-gray-600 text-lg leading-8">
-
-              Our values guide the way we approach
-              food sharing and community support.
-
-            </p>
-
-          </div>
-
-          {/* Value Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14">
-
-            {values.map((value, index) => (
-
-              <div
-                key={index}
-                className="group bg-[#f8faf6] p-7 rounded-3xl border border-green-100 hover:bg-white hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
-              >
-
-                <div className={`w-16 h-16 ${value.color} rounded-2xl flex items-center justify-center text-3xl`}>
-
-                  {value.icon}
-
-                </div>
-
-                <h3 className="mt-6 text-xl font-bold text-green-900">
-                  {value.title}
-                </h3>
-
-                <p className="mt-4 text-gray-600 text-sm leading-7">
-                  {value.description}
-                </p>
-
-                <div className="mt-6 w-10 h-1 bg-green-500 rounded-full group-hover:w-20 transition-all duration-300"></div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= OUR SERVICES ================= */}
-
-      <section className="py-20 lg:py-28 bg-gradient-to-br from-green-50 to-emerald-50">
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-          {/* Heading */}
-          <div className="text-center max-w-3xl mx-auto">
-
-            <span className="inline-block px-5 py-2 bg-white border border-green-200 rounded-full text-green-700 text-sm font-bold">
-              🍱 What We Do
-            </span>
-
-            <h2 className="mt-6 text-4xl sm:text-5xl font-extrabold text-green-950">
-              How FoodShare Helps
-            </h2>
-
-            <p className="mt-5 text-gray-600 text-lg leading-8">
-
-              FoodShare is designed to make
-              food sharing easier, more organized
-              and more accessible.
-
-            </p>
-
-          </div>
-
-          {/* Service Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-7 mt-14">
-
-            {services.map((service, index) => (
-
-              <div
-                key={index}
-                className="group bg-white rounded-3xl p-8 border border-green-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
-              >
-
-                <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-green-200 transition-colors">
-
-                  {service.icon}
-
-                </div>
-
-                <h3 className="mt-7 text-xl font-bold text-green-900">
-                  {service.title}
-                </h3>
-
-                <p className="mt-4 text-gray-600 leading-7 text-sm">
-                  {service.description}
-                </p>
-
-                <div className="mt-7 w-12 h-1 bg-green-500 rounded-full group-hover:w-24 transition-all duration-300"></div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= COMMUNITY SECTION ================= */}
-
-      <section className="py-20 lg:py-28 bg-white">
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-          <div className="grid lg:grid-cols-2 gap-14 items-center">
-
-            {/* Left Content */}
-            <div>
-
-              <span className="inline-block px-5 py-2 bg-green-100 text-green-700 text-sm font-bold rounded-full">
-                🤝 Our Community
-              </span>
-
-              <h2 className="mt-6 text-4xl sm:text-5xl font-extrabold text-green-950 leading-tight">
-
-                Together, We Can
-
-                <span className="block bg-gradient-to-r from-green-600 to-emerald-400 bg-clip-text text-transparent">
-                  Make a Difference.
-                </span>
-
-              </h2>
-
-              <p className="mt-6 text-lg text-gray-600 leading-8">
-
-                FoodShare brings together people
-                who believe in helping others
-                and reducing unnecessary food waste.
-
-                Whether you're an individual,
-                a restaurant, a business or an NGO,
-                you can be part of our mission.
-
-              </p>
-
-              {/* Community Features */}
-              <div className="mt-8 space-y-4">
-
-                <div className="flex items-center gap-3">
-
-                  <span className="w-9 h-9 shrink-0 bg-green-100 rounded-full flex items-center justify-center">
-                    ✓
-                  </span>
-
-                  <p className="text-gray-700 font-medium">
-                    Connect with food-sharing communities
-                  </p>
-
-                </div>
-
-                <div className="flex items-center gap-3">
-
-                  <span className="w-9 h-9 shrink-0 bg-green-100 rounded-full flex items-center justify-center">
-                    ✓
-                  </span>
-
-                  <p className="text-gray-700 font-medium">
-                    Support responsible food donations
-                  </p>
-
-                </div>
-
-                <div className="flex items-center gap-3">
-
-                  <span className="w-9 h-9 shrink-0 bg-green-100 rounded-full flex items-center justify-center">
-                    ✓
-                  </span>
-
-                  <p className="text-gray-700 font-medium">
-                    Help reduce food waste
-                  </p>
-
-                </div>
-
-              </div>
-
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-3 mt-9 px-8 py-4 bg-gradient-to-r from-green-700 to-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              >
-                Join FoodShare →
-              </Link>
-
-            </div>
-
-            {/* Right Image */}
-            <div className="relative">
-
-              <div className="absolute -inset-4 bg-green-200/40 rounded-[3rem] blur-2xl"></div>
-
-              <img
-                src={img3}
-                alt="FoodShare community"
-                loading="lazy"
-                className="relative w-full h-[380px] sm:h-[500px] object-cover rounded-[2.5rem] shadow-xl"
-              />
-
-              <div className="absolute bottom-5 left-5 right-5 bg-white/95 backdrop-blur-md p-5 rounded-2xl shadow-lg">
-
-                <p className="text-green-800 font-bold text-lg">
-                  💚 Share Food. Spread Hope.
-                </p>
-
-                <p className="text-gray-500 text-sm mt-1">
-                  Small actions can create meaningful change.
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ================= FINAL CTA ================= */}
-
-      <section className="relative overflow-hidden bg-gradient-to-r from-green-800 via-green-700 to-emerald-600 py-20 lg:py-24">
-
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-emerald-300/20 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative max-w-4xl mx-auto px-6 text-center">
-
-          <div className="text-5xl">
-            💚
-          </div>
-
-          <h2 className="mt-7 text-4xl sm:text-5xl font-extrabold text-white leading-tight">
-
-            Be Part of the Change
-
-          </h2>
-
-          <p className="mt-6 text-lg text-green-50/90 leading-8 max-w-2xl mx-auto">
-
-            Your small contribution can make a meaningful
-            difference.
-
-            Join FoodShare and help us build
-            a community where good food
-            is shared instead of wasted.
-
+      {/* ============ HERO ============ */}
+      <section className="max-w-6xl mx-auto px-6 pt-10 pb-14 grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <Eyebrow>About FoodShare</Eyebrow>
+
+          <h1 className="mt-5 text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.12] text-[#0F2E22]">
+            Empowering <Highlight>Communities,</Highlight>
+            <br />
+            Nourishing Futures
+          </h1>
+
+          <p className="mt-6 text-lg leading-relaxed text-[#3B4F43] max-w-lg">
+            FoodShare is a community-focused platform that connects surplus food
+            donors with NGOs and volunteers who can get it to people in need,
+            before it spoils.
           </p>
 
-          <div className="mt-9 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              to="/register"
+              className={`inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#0F2E22] text-white font-semibold hover:bg-[#184230] transition shadow-lg shadow-[#0F2E22]/20 ${focus}`}
+            >
+              Join our mission
+              <Icon name="arrow" className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/contact"
+              className={`inline-flex items-center px-7 py-3 rounded-full bg-[#F2B01E] text-[#0F2E22] font-semibold hover:bg-[#FFC53D] transition ${focus}`}
+            >
+              Contact us
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="absolute -bottom-3 -right-3 w-full h-full rounded-3xl bg-[#F2B01E]" aria-hidden="true" />
+          <img
+            src={img3}
+            alt="FoodShare community initiative"
+            loading="lazy"
+            className="relative w-full h-[320px] object-cover rounded-3xl shadow-xl"
+          />
+
+          {/* ভাসমান কার্ড */}
+          <div className="absolute -bottom-6 left-4 right-4 sm:left-6 sm:right-auto bg-white rounded-2xl shadow-xl px-5 py-4 flex items-center gap-4">
+            <span className="w-12 h-12 shrink-0 rounded-full bg-[#0F2E22] text-[#F2B01E] flex items-center justify-center">
+              <Icon name="bowl" className="w-5 h-5" />
+            </span>
+            <div>
+              <p className="text-xs text-[#3B4F43]">Our purpose</p>
+              <p className="font-semibold text-[#0F2E22]">Good food. Better purpose.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ OUR STORY ============ */}
+      <section className="bg-white mt-6">
+        <div className="max-w-6xl mx-auto px-6 py-14 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="relative">
+            <div className="absolute -bottom-3 -left-3 w-full h-full rounded-3xl bg-[#8FD19E]" aria-hidden="true" />
+            <img
+              src={img4}
+              alt="Community food sharing"
+              loading="lazy"
+              className="relative w-full h-[340px] object-cover rounded-3xl shadow-lg"
+            />
+            <span className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0F2E22] shadow-md">
+              <span className="w-2 h-2 rounded-full bg-[#F2B01E]" aria-hidden="true" />
+              Every meal matters
+            </span>
+          </div>
+
+          <div>
+            <Eyebrow>Our story</Eyebrow>
+
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold leading-tight text-[#0F2E22]">
+              Why we created <Highlight>FoodShare</Highlight>
+            </h2>
+
+            <p className="mt-5 text-[#3B4F43] leading-7">
+              Every day, usable food may go to waste while many people struggle
+              to access enough meals. FoodShare was built around a simple idea:
+              connect people who have extra food with organizations that can put
+              it to good use.
+            </p>
+            <p className="mt-3 text-[#3B4F43] leading-7">
+              The problem is timing, not shortage. Cooked food spoils within
+              hours, so donors post food with an expiry time, NGOs see the most
+              urgent listings first, and each pickup is tracked until it is
+              delivered.
+            </p>
 
             <Link
               to="/register"
-              className="inline-flex items-center px-8 py-4 bg-white text-green-800 font-bold rounded-xl shadow-xl hover:bg-green-50 hover:-translate-y-1 transition-all duration-300"
+              className={`inline-flex items-center gap-2 mt-7 px-7 py-3 rounded-full bg-[#0F2E22] text-white font-semibold hover:bg-[#184230] transition shadow-lg shadow-[#0F2E22]/20 ${focus}`}
             >
-              Get Started →
+              Become a member
+              <Icon name="arrow" className="w-4 h-4" />
             </Link>
+          </div>
+        </div>
+      </section>
 
-            <Link
-              to="/contact"
-              className="inline-flex items-center px-8 py-4 border-2 border-white/70 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300"
-            >
-              Contact Us
-            </Link>
-
+      {/* ============ MISSION & VISION ============ */}
+      <section className="bg-[#FFF6DB]">
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <div className="text-center max-w-2xl mx-auto">
+            <Eyebrow>What drives us</Eyebrow>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold text-[#0F2E22]">
+              Our <Highlight>mission</Highlight> and vision
+            </h2>
+            <p className="mt-4 text-[#3B4F43] leading-7">
+              Building stronger communities through responsible food sharing and
+              meaningful connections.
+            </p>
           </div>
 
+          <div className="mt-10 grid md:grid-cols-2 gap-5">
+            {MISSION_VISION.map((m) => (
+              <div key={m.title} className="group bg-white rounded-3xl p-7 shadow-sm hover:shadow-lg motion-safe:transition">
+                <span className={`w-14 h-14 rounded-full flex items-center justify-center ${m.ring}`}>
+                  <Icon name={m.icon} className="w-6 h-6" />
+                </span>
+                <h3 className="mt-5 text-2xl font-bold text-[#0F2E22]">{m.title}</h3>
+                <p className="mt-3 text-[#3B4F43] leading-7">{m.text}</p>
+                <div
+                  className={`mt-6 h-1 w-14 rounded-full ${m.bar} motion-safe:transition-all motion-safe:duration-300 group-hover:w-24`}
+                />
+              </div>
+            ))}
+          </div>
         </div>
+      </section>
 
+      {/* ============ VALUES (গাঢ় সবুজ ব্যান্ড) ============ */}
+      <section className="bg-[#0F2E22]">
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <div className="max-w-2xl">
+            <Eyebrow dark>Our core values</Eyebrow>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold text-white">
+              What we <span className="text-[#F2B01E]">believe in</span>
+            </h2>
+            <p className="mt-4 text-[#DCE9E0] leading-7">
+              Our values guide the way we approach food sharing and community support.
+            </p>
+          </div>
+
+          <div className="mt-9 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {VALUES.map((v) => (
+              <div key={v.title} className="rounded-2xl bg-white/[0.07] border border-white/10 p-5">
+                <span className="w-12 h-12 rounded-full bg-[#F2B01E] text-[#0F2E22] flex items-center justify-center">
+                  <Icon name={v.icon} className="w-5 h-5" />
+                </span>
+                <h3 className="mt-4 font-semibold text-white">{v.title}</h3>
+                <p className="mt-1.5 text-sm text-[#A9BFB0] leading-6">{v.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ SERVICES ============ */}
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <Eyebrow>What we do</Eyebrow>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold text-[#0F2E22]">
+          How <Highlight>FoodShare</Highlight> helps
+        </h2>
+        <p className="mt-4 text-[#3B4F43] max-w-xl leading-7">
+          Designed to make food sharing easier, more organized and more accessible.
+        </p>
+
+        <div className="mt-9 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {SERVICES.map((s, i) => (
+            <div key={s.title} className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md motion-safe:transition">
+              <div className="flex items-center justify-between">
+                <span className="w-12 h-12 rounded-full bg-[#FFE9A8] text-[#8A5A00] flex items-center justify-center">
+                  <Icon name={s.icon} className="w-5 h-5" />
+                </span>
+                <span className="text-sm font-semibold text-[#9A6B00] tabular-nums">0{i + 1}</span>
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>
+              <p className="mt-1.5 text-sm text-[#3B4F43] leading-6">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============ NGO পার্টনার (আসল ডেটা, না থাকলে লুকানো) ============ */}
+      {approvedNgos.length > 0 && (
+        <section className="max-w-6xl mx-auto px-6 pb-14">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#0F2E22]">
+            Our <Highlight>NGO partners</Highlight>
+          </h2>
+
+          <ul className="mt-7 flex flex-wrap gap-3">
+            {approvedNgos.map((ngo) => (
+              <li
+                key={ngo.id}
+                className="flex items-center gap-3 bg-white rounded-full pl-2 pr-5 py-2 shadow-sm border border-[#0F2E22]/10"
+              >
+                {ngo.image ? (
+                  <img src={ngo.image} alt="" className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <span className="w-9 h-9 rounded-full bg-[#ECE4C8]" aria-hidden="true" />
+                )}
+                <span className="font-medium text-sm">{ngo.name}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* ============ EVENTS ============ */}
+      {EVENTS.length > 0 && (
+        <section className="bg-white">
+          <div className="max-w-6xl mx-auto px-6 py-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0F2E22]">
+              Our <Highlight>events</Highlight>
+            </h2>
+            <p className="mt-4 text-[#3B4F43]">Moments from the field.</p>
+
+            <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {EVENTS.map((e, i) => (
+                <div key={i} className="relative rounded-2xl overflow-hidden group h-[260px] shadow-md">
+                  <img
+                    src={e.img}
+                    alt={e.title}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 motion-safe:transition motion-safe:duration-500"
+                  />
+                  <div className="absolute inset-0 bg-[#0F2E22]/55 flex flex-col items-center justify-center text-center p-6">
+                    <h3 className="text-white font-bold text-lg leading-snug">{e.title}</h3>
+                    {e.date && <p className="mt-1 text-sm text-[#F2B01E]">{e.date}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ============ TEAM ============ */}
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <h2 className="text-3xl md:text-4xl font-bold text-[#0F2E22]">
+          The <Highlight>team</Highlight> behind it
+        </h2>
+
+        <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {TEAM.map((m, i) => (
+            <div key={i} className="bg-white rounded-2xl p-3 shadow-sm">
+              <Photo src={m.img} alt={m.name} className="w-full h-44 rounded-xl" />
+              <div className="px-1 pt-3 pb-1">
+                <p className="font-semibold">{m.name || "Name"}</p>
+                <p className="text-sm text-[#3B4F43]">{m.role || "Role"}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============ COMMUNITY (কোলাজসহ) ============ */}
+      <section className="bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-14 grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <Eyebrow>Our community</Eyebrow>
+
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold leading-tight text-[#0F2E22]">
+              Together, we can <Highlight>make a difference.</Highlight>
+            </h2>
+
+            <p className="mt-5 text-[#3B4F43] leading-7 max-w-lg">
+              FoodShare brings together people who believe in helping others and
+              reducing unnecessary food waste. Whether you're an individual, a
+              restaurant, a business or an NGO, you can be part of our mission.
+            </p>
+
+            <ul className="mt-6 space-y-3">
+              {COMMUNITY_POINTS.map((p) => (
+                <li key={p} className="flex items-center gap-3">
+                  <span className="w-8 h-8 shrink-0 rounded-full bg-[#F2B01E] text-[#0F2E22] flex items-center justify-center">
+                    <Icon name="check" className="w-4 h-4" />
+                  </span>
+                  <span className="font-medium text-[#14231B]">{p}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              to="/register"
+              className={`inline-flex items-center gap-2 mt-8 px-7 py-3 rounded-full bg-[#0F2E22] text-white font-semibold hover:bg-[#184230] transition shadow-lg shadow-[#0F2E22]/20 ${focus}`}
+            >
+              Join FoodShare
+              <Icon name="arrow" className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* কোলাজ */}
+          <div className="relative h-[380px] max-w-md mx-auto lg:max-w-none w-full">
+            <span className="absolute -top-3 left-6 w-20 h-20 rounded-full bg-[#F2B01E]" aria-hidden="true" />
+            <img
+              src="https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?w=600"
+              alt="Kids eating"
+              className="absolute top-0 right-0 w-[55%] h-[55%] object-cover rounded-2xl shadow-lg z-10"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=600"
+              alt="Volunteer"
+              className="absolute top-[38%] left-0 w-[55%] h-[55%] object-cover rounded-2xl shadow-lg z-20"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=600"
+              alt="Community meal"
+              className="absolute bottom-0 right-[8%] w-[48%] h-[45%] object-cover rounded-2xl shadow-lg z-30"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ============ FINAL CTA ============ */}
+      <section className="max-w-6xl mx-auto px-6 py-12">
+        <div className="relative overflow-hidden rounded-[2rem] bg-[#0F2E22] px-6 md:px-10 py-10">
+          <img
+            src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1400"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[#0F2E22]/85" aria-hidden="true" />
+
+          <div className="relative grid md:grid-cols-[1.3fr_1fr] gap-6 items-center">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.16em] uppercase text-[#F2B01E]">Be part of the change</p>
+              <h2 className="mt-2 text-3xl md:text-4xl font-bold text-white">Got food, or time to give?</h2>
+              <p className="mt-3 text-sm md:text-base text-[#DCE9E0] leading-7 max-w-lg">
+                Your small contribution can make a meaningful difference. Join
+                FoodShare and help build a community where good food is shared
+                instead of wasted.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 md:justify-end">
+              <Link
+                to="/register"
+                className="inline-flex items-center px-7 py-3 rounded-full bg-[#F2B01E] text-[#0F2E22] font-semibold hover:bg-[#FFC53D] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Get started
+              </Link>
+              <Link
+                to="/contact"
+                className="inline-flex items-center px-7 py-3 rounded-full border-2 border-white/80 text-white font-semibold hover:bg-white/10 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Contact us
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
 
       <Footer />
-
     </div>
   );
 }
