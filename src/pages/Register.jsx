@@ -79,7 +79,7 @@ function Register() {
   }
 
   // Handle registration
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     setError("");
@@ -95,7 +95,7 @@ function Register() {
       return;
     }
 
-    const result = register({
+    const result = await register({
       name: form.name,
       email: form.email,
       password: form.password,

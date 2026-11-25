@@ -29,11 +29,11 @@ function Login() {
   }
 
   // Handle login
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    const result = login(form.email, form.password);
+    const result = await login(form.email, form.password);
 
     if (!result.success) {
       setError(result.message);
